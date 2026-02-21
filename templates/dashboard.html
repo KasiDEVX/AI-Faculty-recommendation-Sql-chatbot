@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Command Center</title>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+    <div class="glow"></div>
+
+    <!-- Mobile Hamburger -->
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+        <i class="ri-menu-3-line"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="ri-dashboard-3-line"></i>
+                <span>Faculty AI</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a class="nav-item active" href="#section-home">
+                    <i class="ri-home-4-line"></i> Home
+                </a>
+
+                <a class="nav-item" href="#section-dashboard">
+                    <i class="ri-pie-chart-2-line"></i> Dashboard
+                </a>
+
+                <a class="nav-item" href="#section-sql">
+                    <i class="ri-database-2-line"></i> SQL Query Chatbot
+                </a>
+
+                <a class="nav-item" href="#section-predict">
+                    <i class="ri-brain-line"></i> Backlog Predictor
+                </a>
+
+                <a class="nav-item" href="#section-students">
+                    <i class="ri-user-search-line"></i> Student Details
+                </a>
+            </nav>
+
+            <div class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+                <i class="ri-moon-line" id="themeIcon"></i>
+                <span id="themeLabel">Dark Mode</span>
+            </div>
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <!-- SECTION: HOME -->
+            <div id="section-home" class="scroll-section">
+                <div class="header reveal">
+                    <h1>Academic Risk Intelligence</h1>
+                    <p>Real-time analytics for student performance and attendance.</p>
+                </div>
+            </div>
+
+            <!-- KPI Cards (part of Home) -->
+            <div class="cards-grid reveal-stagger">
+                <div class="card reveal">
+                    <div class="card-icon icon-blue"><i class="ri-group-line"></i></div>
+                    <h4>Total Students</h4>
+                    <h2 id="totalStudents">...</h2>
+                </div>
+
+                <div class="card reveal">
+                    <div class="card-icon icon-green"><i class="ri-check-double-line"></i></div>
+                    <h4>Low Risk</h4>
+                    <h2 id="lowPercent" style="color: var(--risk-low)">...</h2>
+                </div>
+
+                <div class="card reveal">
+                    <div class="card-icon icon-yellow"><i class="ri-alert-line"></i></div>
+                    <h4>Moderate Risk</h4>
+                    <h2 id="moderatePercent" style="color: var(--risk-mod)">...</h2>
+                </div>
+
+                <div class="card reveal">
+                    <div class="card-icon icon-red"><i class="ri-alarm-warning-line"></i></div>
+                    <h4>High Risk</h4>
+                    <h2 id="highPercent" style="color: var(--risk-high)">...</h2>
+                </div>
+            </div>
+
+            <!-- SECTION: DASHBOARD (Charts + AI Insight) -->
+            <div id="section-dashboard" class="scroll-section">
+                <h2 class="reveal" style="margin-bottom: 1.5rem; font-weight: 600;">Dashboard</h2>
+                <div class="charts-container">
+                    <div class="chart-card reveal reveal-left">
+                        <div class="chart-header">
+                            <span class="chart-title">Risk Distribution</span>
+                            <i class="ri-pie-chart-2-line" style="color: var(--text-muted)"></i>
+                        </div>
+                        <canvas id="riskPie"></canvas>
+                    </div>
+                    <div class="chart-card reveal reveal-right">
+                        <div class="chart-header">
+                            <span class="chart-title">Risk Comparison</span>
+                            <i class="ri-bar-chart-groupped-line" style="color: var(--text-muted)"></i>
+                        </div>
+                        <canvas id="riskBar"></canvas>
+                    </div>
+                </div>
+
+                <!-- Department Semester Analytics -->
+                <div class="chart-card reveal reveal-scale" style="margin-bottom: 2rem;">
+                    <div class="chart-header">
+                        <span class="chart-title"><i class="ri-line-chart-line"
+                                style="color: var(--primary); margin-right: 8px;"></i>Department Semester
+                            Analytics</span>
+                        <i class="ri-building-2-line" style="color: var(--text-muted)"></i>
+                    </div>
+
+                    <!-- Department Selector Bar -->
+                    <div class="dept-selector" id="deptSelector">
+                        <span class="dept-loading" id="deptLoading">Loading departments...</span>
+                    </div>
+
+                    <canvas id="deptLineChart" height="120"></canvas>
+                </div>
+
+                <div class="insight-section reveal">
+                    <i class="ri-robot-2-line insight-icon"></i>
+                    <div class="insight-content">
+                        <h3>AI Faculty Recommendation</h3>
+                        <p id="aiInsight">Analyzing academic health data...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- SECTION: SQL QUERY CHATBOT -->
+            <div id="section-sql" class="scroll-section">
+                <div class="sql-card reveal reveal-scale">
+
+                    <h3 style="margin-bottom:20px;"><i class="ri-database-2-line"
+                            style="color: var(--primary); margin-right: 8px;"></i>SQL Query Chatbot</h3>
+
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="sqlInput" class="sql-input" placeholder="Ask a database question...">
+
+                        <button onclick="runQuery()" class="sql-run-btn">
+                            Run
+                        </button>
+                    </div>
+
+                    <div id="sqlOutput" class="sql-output">
+                        <em style="color: var(--text-muted);">Results will appear here...</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: BACKLOG PREDICTOR -->
+            <div id="section-predict" class="scroll-section">
+                <h2 style="margin-bottom: 1.5rem; font-weight: 600;">
+                    <i class="ri-brain-line" style="color: var(--primary); margin-right: 8px;"></i>Backlog Predictor
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">AI-powered prediction of students likely to
+                    get backlogs next semester based on GPA trends, attendance, failed subjects, and engagement metrics.
+                </p>
+
+                <!-- Prediction Summary Cards -->
+                <div class="predict-summary reveal-stagger" id="predictSummary">
+                    <div class="predict-stat-card predict-stat-high reveal">
+                        <i class="ri-error-warning-line"></i>
+                        <div>
+                            <span class="predict-stat-value" id="predictHigh">...</span>
+                            <span class="predict-stat-label">High Risk</span>
+                        </div>
+                    </div>
+                    <div class="predict-stat-card predict-stat-mod reveal">
+                        <i class="ri-alert-line"></i>
+                        <div>
+                            <span class="predict-stat-value" id="predictMod">...</span>
+                            <span class="predict-stat-label">Moderate Risk</span>
+                        </div>
+                    </div>
+                    <div class="predict-stat-card predict-stat-low reveal">
+                        <i class="ri-shield-check-line"></i>
+                        <div>
+                            <span class="predict-stat-value" id="predictLow">...</span>
+                            <span class="predict-stat-label">Low Risk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prediction Table -->
+                <div class="chart-card reveal">
+                    <div class="chart-header">
+                        <span class="chart-title">Predicted Backlog Students</span>
+                        <i class="ri-file-warning-line" style="color: var(--text-muted)"></i>
+                    </div>
+
+                    <div class="controls-row">
+                        <input type="text" id="predictSearch" class="search-input" placeholder="Search student name...">
+                        <select id="predictFilter" class="filter-select">
+                            <option value="All">All Risks</option>
+                            <option value="High">High Risk</option>
+                            <option value="Moderate">Moderate Risk</option>
+                            <option value="Low">Low Risk</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+                        <table class="student-table">
+                            <thead style="position: sticky; top: 0; background: #1e293b; z-index: 5;">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>GPA</th>
+                                    <th>Attendance</th>
+                                    <th>Failed</th>
+                                    <th>Weak Subjects</th>
+                                    <th>Backlog Probability</th>
+                                    <th>Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody id="predictTable">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: STUDENT DETAILS -->
+            <div id="section-students" class="scroll-section">
+                <h2 style="margin-bottom: 1.5rem; font-weight: 600;">Student Details</h2>
+
+                <div class="chart-card reveal">
+                    <div class="chart-header">
+                        <span class="chart-title">Student Risk Monitor</span>
+                        <i class="ri-table-line" style="color: var(--text-muted)"></i>
+                    </div>
+
+                    <div class="controls-row">
+                        <input type="text" id="searchInput" class="search-input"
+                            placeholder="Search by student name...">
+
+                        <select id="riskFilter" class="filter-select">
+                            <option value="All">All Risk Levels</option>
+                            <option value="Low">Low Risk</option>
+                            <option value="Moderate">Moderate Risk</option>
+                            <option value="High">High Risk</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="student-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Semester</th>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTable">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Student Profile Modal -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal-container">
+            <button class="modal-close" id="modalClose">&times;</button>
+
+            <div class="modal-header">
+                <div class="modal-avatar" id="modalAvatar">?</div>
+                <div class="modal-info">
+                    <h2 id="modalName">Student Name</h2>
+                    <div class="modal-meta">
+                        <span id="modalDept"><i class="ri-building-2-line"></i> Department</span>
+                        <span id="modalYear"><i class="ri-calendar-line"></i> Year</span>
+                        <span id="modalGender"><i class="ri-user-line"></i> Gender</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-charts-grid">
+                <div class="modal-chart-card">
+                    <h4><i class="ri-line-chart-line"></i> GPA Trend</h4>
+                    <canvas id="modalGpaChart"></canvas>
+                </div>
+                <div class="modal-chart-card">
+                    <h4><i class="ri-bar-chart-line"></i> Attendance Trend</h4>
+                    <canvas id="modalAttChart"></canvas>
+                </div>
+                <div class="modal-chart-card">
+                    <h4><i class="ri-radar-line"></i> Subject Performance</h4>
+                    <canvas id="modalRadarChart"></canvas>
+                </div>
+                <div class="modal-chart-card">
+                    <h4><i class="ri-pulse-line"></i> Engagement</h4>
+                    <canvas id="modalEngChart"></canvas>
+                </div>
+            </div>
+
+            <div class="modal-ai-box" id="modalAiBox">
+                <div class="modal-ai-header">
+                    <i class="ri-robot-2-line"></i>
+                    <h4>AI Recommendation</h4>
+                </div>
+                <p id="modalAiText">Loading recommendation...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+
+</html>
